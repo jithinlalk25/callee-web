@@ -1,20 +1,41 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
-import { Flex, Heading, Text } from "@chakra-ui/react";
+import Form from "./routes/Form";
+import CallToActionWithAnnotation from "./routes/Home";
+import PrivacyPolicy from "./routes/PrivacyPolicy";
+import TermsAndConditions from "./routes/TermsAndConditions";
+import ContactUs from "./routes/ContactUs";
+import PaymentStatus from "./routes/PaymentStatus";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <CallToActionWithAnnotation />,
+  },
+  {
+    path: "/privacy-policy",
+    element: <PrivacyPolicy />,
+  },
+  {
+    path: "/terms-and-conditions",
+    element: <TermsAndConditions />,
+  },
+  {
+    path: "/contact-us",
+    element: <ContactUs />,
+  },
+  {
+    path: "/payment-status/:orderId",
+    element: <PaymentStatus />,
+  },
+  {
+    path: "/:id",
+    element: <Form />,
+  },
+]);
 
 function App() {
-  return (
-    <Flex
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      height="100vh"
-    >
-      <Heading as="h1" size="4xl">
-        Callee
-      </Heading>
-      <Text fontSize="md">Money collection made easy</Text>
-    </Flex>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
