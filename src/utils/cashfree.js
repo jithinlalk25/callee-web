@@ -1,10 +1,11 @@
 import { load } from "@cashfreepayments/cashfree-js";
+import { Constant } from "./constants";
 
-export async function checkout(paymentSessionId, returnUrl) {
+export async function checkout(paymentSessionId, returnUrl, setLoading) {
   let cashfree;
   var initializeSDK = async function () {
     cashfree = await load({
-      mode: "sandbox",
+      mode: Constant.ENV == "prod" ? "production" : "sandbox",
     });
   };
   await initializeSDK();
@@ -13,6 +14,8 @@ export async function checkout(paymentSessionId, returnUrl) {
     paymentSessionId,
     redirectTarget: "_modal",
   };
+
+  // setLoading(false);
   cashfree.checkout(checkoutOptions).then((result) => {
     if (result.error) {
       // This will be true whenever user clicks on close icon inside the modal or any error happens during the payment
@@ -28,6 +31,7 @@ export async function checkout(paymentSessionId, returnUrl) {
       console.log("Payment will be redirected");
     }
     if (result.paymentDetails) {
+      // setLoading(true);
       // This will be called whenever the payment is completed irrespective of transaction status
       console.log("Payment has been completed, Check for Payment Status");
       console.log(result.paymentDetails.paymentMessage);

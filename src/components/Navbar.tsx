@@ -330,4 +330,8 @@ const NAV_ITEMS: Array<NavItem> = [
     label: "Contact Us",
     href: "contact-us",
   },
+  {
+    label: "Cancellation & Refund Policy",
+    href: "cancellation-refund-policy",
+  },
 ];

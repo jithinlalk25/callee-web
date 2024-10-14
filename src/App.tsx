@@ -6,6 +6,7 @@ import PrivacyPolicy from "./routes/PrivacyPolicy";
 import TermsAndConditions from "./routes/TermsAndConditions";
 import ContactUs from "./routes/ContactUs";
 import PaymentStatus from "./routes/PaymentStatus";
+import CancellationRefundPolicy from "./routes/CancellationRefundPolicy";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
   {
     path: "/contact-us",
     element: <ContactUs />,
+  },
+  {
+    path: "/cancellation-refund-policy",
+    element: <CancellationRefundPolicy />,
   },
   {
     path: "/payment-status/:orderId",
