@@ -1,15 +1,11 @@
 import {
-  Box,
   Button,
-  Divider,
   Flex,
   FormControl,
   FormLabel,
   Heading,
   HStack,
   Input,
-  InputGroup,
-  InputLeftAddon,
   Link,
   Spinner,
   Text,
@@ -19,7 +15,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Constant } from "../utils/constants";
-import { checkout } from "../utils/cashfree";
 
 enum AmountTypeEnum {
   FIXED = "FIXED",
@@ -42,6 +37,19 @@ function Form() {
   const [platformFee, setPlatformFee] = useState<number>(0);
   const [whatsAppNumber, setWhatsAppNumber] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Load the Razorpay script dynamically
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Clean up by removing the script when the component is unmounted
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const init = async () => {
     const response = await axios.get(
@@ -114,11 +122,50 @@ function Form() {
         whatsAppNumber,
       }
     );
-    checkout(
-      response.data.paymentSessionId,
-      response.data.returnUrl,
-      setLoading
-    );
+
+    handlePayment(response.data);
+  };
+
+  const handlePayment = (order: any) => {
+    const options = {
+      key: "rzp_test_FjZgcSGLlIrOg1", // Enter the Key ID generated from the Dashboard
+      amount: order.order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise or ₹500
+      currency: "INR",
+      name: "Callee", // Your business name
+      // description: "Test Transaction",
+      image:
+        "https://firebasestorage.googleapis.com/v0/b/callee-fa3c9.appspot.com/o/Copy%20of%20C.png?alt=media",
+      order_id: order.order.id, // Sample Order ID. Pass the `id` obtained in the response of Step 1
+      handler: function (response: any) {
+        // alert(`Payment ID: ${response.razorpay_payment_id}`);
+        // alert(`Order ID: ${response.razorpay_order_id}`);
+        // alert(`Signature: ${response.razorpay_signature}`);
+
+        axios.post(`${Constant.API_URL}payment-web/razorpaySuccessCallback`, {
+          orderId: order._id,
+          razorpayOrderId: order.order.id,
+          data: response,
+        });
+
+        window.location.href = `${Constant.FORM_URL}payment-status/${order._id}`;
+      },
+      theme: {
+        color: "#5c6e77",
+      },
+    };
+
+    const rzp1 = new (window as any).Razorpay(options);
+    rzp1.on("payment.failed", function (response: any) {
+      alert(`Error Code: ${response.error.code}`);
+      alert(`Description: ${response.error.description}`);
+      alert(`Source: ${response.error.source}`);
+      alert(`Step: ${response.error.step}`);
+      alert(`Reason: ${response.error.reason}`);
+      alert(`Order ID: ${response.error.metadata.order_id}`);
+      alert(`Payment ID: ${response.error.metadata.payment_id}`);
+    });
+
+    rzp1.open();
   };
 
   const renderTextWithLinks = (text: string) => {
@@ -185,7 +232,6 @@ function Form() {
                     <Button {...dec}>-</Button>
                     <Input {...input} />
                     <Button {...inc}>+</Button>
-                    <Text>{quantity}</Text>
                   </HStack>
                 </div>
               )}
@@ -223,10 +269,8 @@ function Form() {
                   </>
                 )}
               </div>
-              <Divider marginTop="20px" marginBottom="20px" />
-              <FormLabel color="blue">
-                Receive Payment Confirmation on WhatsApp
-              </FormLabel>
+              {/* <Divider marginTop="20px" marginBottom="20px" />
+              <FormLabel color="blue">Get Payment Confirmation</FormLabel>
               <InputGroup maxWidth={200} size="sm">
                 <InputLeftAddon>+91</InputLeftAddon>
                 <Input
@@ -243,7 +287,7 @@ function Form() {
                     // setWhatsAppNumber(event.target.value);
                   }}
                 />
-              </InputGroup>
+              </InputGroup> */}
 
               <Button
                 colorScheme="teal"
@@ -254,7 +298,8 @@ function Form() {
                 disabled={
                   !Object.values(fields).every(
                     (value: any) => value.trim().length > 0
-                  ) || whatsAppNumber.trim().length != 10
+                  )
+                  //  || whatsAppNumber.trim().length != 10
                 }
               >
                 Pay

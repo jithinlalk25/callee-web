@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "callee-fa3c9"
-  }
+  },
+  "targets": {
+    "callee-fa3c9": {
+      "hosting": {
+        "dev": [
+          "form-callee-dev"
+        ],
+        "prod": [
+          "callee-fa3c9"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
